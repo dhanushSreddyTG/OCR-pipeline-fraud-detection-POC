@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html data-theme="dark" lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>OCR fraud detector</title>
+    <!-- Google Fonts: Outfit (labels/headers) and JetBrains Mono (data/code) -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap"
+        rel="stylesheet" />
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="sidebar-open">
+    <!-- Ambient background glows -->
+    <div class="ambient-glow glow-1"></div>
+    <div class="ambient-glow glow-2"></div>
+
+    <!-- Glassmorphism Navigation Bar -->
+    <nav>
+        <div class="nav-logo-container">
+            <button id="sidebar-toggle" class="sidebar-toggle-btn" title="Toggle Control Center" style="background: none; border: none; font-size: 1.3rem; cursor: pointer; color: var(--text-primary); display: flex; align-items: center; justify-content: center; margin-right: 8px;">☰</button>
+            <span class="nav-logo-text">OCR fraud detector</span>
+        </div>
+        <div class="nav-right">
+            <button class="btn btn-secondary" id="btn-reset-top" style="display: none; padding: 0.5rem 1.2rem; font-size: 0.82rem; border-radius: 12px; margin-right: 15px;">Scan New Document</button>
+            <select class="theme-select" id="theme-toggle" title="Select Theme">
+                <option value="light">Light Theme</option>
+                <option value="dark" selected>Dark Theme</option>
+            </select>
+        </div>
+    </nav>
+
+    <!-- Sidebar overlay for mobile screens -->
+    <div class="sidebar-overlay" id="sidebar-overlay"></div>
+
+    <!-- Sidebar Control Center (Upload Panel) -->
+    <aside class="sidebar open" id="control-center-sidebar">
+        <div class="sidebar-header-row">
+            <h2 class="panel-title">Control Center</h2>
+        </div>
+
+        <!-- Submission section -->
+        <div class="scanner-section" id="scanner-area">
+            <div class="selector-group">
+                <label class="selector-label">Document Source</label>
+                <div class="dropzone-area" id="drop-zone">
+                    <div class="upload-prompt-wrapper" id="upload-prompt">
+                        <svg class="upload-icon-svg" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="36" height="36" style="color: var(--accent); margin-bottom: 12px; opacity: 0.85;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <div class="dropzone-text-primary">Click or drag document here</div>
+                        <div class="dropzone-text-secondary" style="margin-bottom: 8px;">Supports PNG, JPG, JPEG, WEBP, PDF & DOCX</div>
+                        <button class="btn btn-secondary btn-upload-browse" style="padding: 0.45rem 1.2rem; font-size: 0.8rem; pointer-events: none;">Browse File</button>
+                    </div>
+                    <!-- Uploaded file replacement state -->
+                    <div class="uploaded-state-wrapper" id="uploaded-state" style="display: none; flex-direction: column; align-items: center; gap: 0.6rem; width: 100%; text-align: center;">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="36" height="36" style="color: var(--success); margin-bottom: 4px;">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <div class="uploaded-filename" id="uploaded-filename" style="font-weight: 700; font-size: 0.85rem; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text-primary);">Document Loaded</div>
+                        <button class="btn btn-primary btn-upload-new" style="margin-top: 6px; padding: 0.45rem 1.2rem; font-size: 0.8rem; pointer-events: none;">Upload New Document</button>
+                    </div>
+                    <input type="file" id="file-input" class="file-input" accept=".png,.jpg,.jpeg,.webp,.pdf,.docx">
+                </div>
+            </div>
+
+            <!-- Loader Progress bar & Stepper -->
+            <div class="progress-box" id="progress-container" style="display: none;">
+                <div class="progress-meta">
+                    <div class="progress-bar-bg">
+                        <div class="progress-bar-fill" id="progress-fill"></div>
+                    </div>
+                    <span class="progress-percentage" id="progress-text">0%</span>
+                </div>
+
+                <div class="stepper-list" id="stepper-list">
+                    <div class="step-item" id="step-0">
+                        <span class="step-icon">1</span>
+                        <span class="step-label">Upload & File Initialization</span>
+                    </div>
+                    <div class="step-item" id="step-1">
+                        <span class="step-icon">2</span>
+                        <span class="step-label">Structure integrity Checks</span>
+                    </div>
+                    <div class="step-item" id="step-2">
+                        <span class="step-icon">3</span>
+                        <span class="step-label">Metadata Heuristics Audit</span>
+                    </div>
+                    <div class="step-item" id="step-3">
+                        <span class="step-icon">4</span>
+                        <span class="step-label">Pixel ELA Computations</span>
+                    </div>
+                    <div class="step-item" id="step-4">
+                        <span class="step-icon">5</span>
+                        <span class="step-label">Forensic Synthesis Report</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="status-indicator">
+                <span class="dot"></span>
+                <span>Forensic Core: ONLINE</span>
+            </div>
+            <div class="system-meta">
+                <p>Environment: Node v22.22 / Express</p>
+                <p>Python Core: Pillow & Heuristics</p>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Main Workspace Container -->
+    <div class="main-container">
+
+        <!-- Welcome state placeholder when no scan has been run -->
+        <header class="welcome-header" id="welcome-placeholder">
+            <h1>Document Forensic Intelligence</h1>
+            <p>Select a document in the Control Center to run a structural analysis and error-level pixel-tampering
+                scan.</p>
+        </header>
+
+        <!-- Results Workspace Grid (Shown post scan) -->
+        <div class="results-section" id="results-area" style="display: none;">
+
+            <!-- Telemetry Row / Metric cards -->
+            <div class="telemetry-row">
+                <div class="metric-card">
+                    <span class="metric-label">File Type</span>
+                    <span class="metric-value" id="res-mimetype">N/A</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">File Size</span>
+                    <span class="metric-value" id="res-filesize">N/A</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">MD5 Checksum</span>
+                    <span class="metric-value code-text" id="res-md5" style="font-size: 11px;">N/A</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Latency</span>
+                    <span class="metric-value" id="res-latency">0.00s</span>
+                </div>
+                <div class="metric-card">
+                    <span class="metric-label">Risk Level</span>
+                    <span class="path-badge path-fast" id="overall-risk-badge">LOW RISK</span>
+                </div>
+            </div>
+
+            <!-- Workspace Details (Split view) -->
+            <div class="workspace-grid">
+
+                <!-- Left panel: Visual Comparator / Large Preview -->
+                <div class="glass-panel" style="display: flex; flex-direction: column;">
+                    <h2 class="panel-title">Document Visual Diagnostics</h2>
+
+                    <div id="large-preview-container" style="position: relative; width: 100%;">
+                        <!-- Comparison side-by-side -->
+                        <div class="image-comparator-card" id="image-comparison-area"
+                            style="height: 100%; display: none; flex-direction: column;">
+                            <div class="comparator-split" style="flex: 1;">
+                                <div class="image-box">
+                                    <span class="box-label">ORIGINAL DOCUMENT</span>
+                                    <div class="image-wrapper">
+                                        <div class="img-overlay-parent">
+                                            <img id="img-original" src="" alt="Original Submission">
+                                            <div id="original-overlays" class="overlay-container"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="image-box">
+                                    <span class="box-label">ERROR LEVEL MAP (ELA)</span>
+                                    <div class="image-wrapper ela-box">
+                                        <div class="img-overlay-parent">
+                                            <img id="img-ela" src="" alt="ELA Visual Map">
+                                            <div id="ela-overlays" class="overlay-container"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="comparator-legend">
+                                <p>Bright clusters indicate localized pixel compression anomalies (edited
+                                    text/boundaries).</p>
+                            </div>
+                        </div>
+
+                        <!-- Fallback message for PDFs or docx files where ELA is not run -->
+                        <div id="non-image-placeholder"
+                            style="display: none; padding: 3rem 1rem; text-align: center; color: var(--text-secondary);">
+                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor" width="48" height="48" style="color: var(--text-secondary); margin-bottom: 12px; opacity: 0.5; display: block; margin-left: auto; margin-right: auto;">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            <p>Visual ELA is disabled for non-image documents.</p>
+                            <p style="font-size: 0.8rem; margin-top: 5px;">Verify extracted text and metadata audits on
+                                the side panel.</p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right panel: Risk summaries and detailed reports -->
+                <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+
+                    <!-- Scoring panel -->
+                    <div class="glass-panel" id="score-summary-panel" style="padding: 1.5rem 2rem;">
+                        <h2 class="panel-title">Forensic Risk Index</h2>
+
+                        <div class="score-display-row" style="display: flex; align-items: center; justify-content: space-around; padding: 1rem 0 0.5rem 0;">
+                            <div class="score-item-block" style="text-align: center;">
+                                <span class="score-label" style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px;">Overall Risk</span>
+                                <span id="overall-score-txt" style="font-size: 3.2rem; font-weight: 800; line-height: 1.1; display: block; color: var(--success);">0%</span>
+                            </div>
+                            <div class="score-item-block" style="text-align: center;">
+                                <span class="score-label" style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px;">Metadata Risk</span>
+                                <span id="metadata-score-txt" style="font-size: 2rem; font-weight: 800; line-height: 1.1; display: block; color: var(--success);">0%</span>
+                            </div>
+                            <div class="score-item-block" id="pixel-gauge-wrapper" style="text-align: center; display: none;">
+                                <span class="score-label" style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px;">Pixel ELA Risk</span>
+                                <span id="pixel-score-txt" style="font-size: 2rem; font-weight: 800; line-height: 1.1; display: block; color: var(--success);">0%</span>
+                            </div>
+                            <div class="score-item-block" id="rule-gauge-wrapper" style="text-align: center; display: none;">
+                                <span class="score-label" style="font-size: 0.72rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 1px; display: block; margin-bottom: 4px;">Rule Verification Risk</span>
+                                <span id="rule-score-txt" style="font-size: 2rem; font-weight: 800; line-height: 1.1; display: block; color: var(--success);">0%</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Forensic Analysis Tiles Grid -->
+                    <div class="forensic-tiles-grid" id="forensic-tiles-area">
+                        <!-- Populated dynamically via app.js -->
+                    </div>
+
+                    <!-- Developer JSON Accordion remains below -->
+                    <div class="accordion-section" id="accordion-json" style="width: 100%;">
+                        <div class="accordion-header">
+                            <span>Raw Developer JSON Report</span>
+                            <span class="accordion-arrow">▼</span>
+                        </div>
+                        <div class="accordion-content">
+                            <div class="code-container" style="padding: 0;">
+                                <button class="copy-btn" id="copy-btn">Copy JSON</button>
+                                <pre class="styled-json" id="json-output"></pre>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lightbox Modal for Visual Diagnostics -->
+    <div id="lightbox-modal" class="lightbox-overlay" style="display: none;">
+        <span class="lightbox-close" id="lightbox-close">&times;</span>
+        <button class="lightbox-nav prev" id="lightbox-prev">&#10094;</button>
+        <button class="lightbox-nav next" id="lightbox-next">&#10095;</button>
+        <div class="lightbox-content-wrapper">
+            <div class="lightbox-image-container">
+                <div class="img-overlay-parent lightbox-parent">
+                    <img id="lightbox-img" src="" alt="Lightbox View">
+                    <div id="lightbox-overlays" class="overlay-container"></div>
+                </div>
+            </div>
+            <div class="lightbox-caption" id="lightbox-caption">Original Document</div>
+        </div>
+    </div>
+
+    <!-- Forensic Details Inspector Modal -->
+    <div id="forensic-detail-modal" class="lightbox-overlay" style="display: none; align-items: center; justify-content: center; z-index: 2000;">
+        <div class="modal-card glass-panel" style="width: 90%; max-width: 950px; max-height: 85vh; display: flex; flex-direction: column; overflow: hidden; border-radius: 20px; border: 1px solid var(--border); box-shadow: 0 20px 50px rgba(0,0,0,0.5); background: var(--card-bg);">
+            <div class="modal-header" style="padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between;">
+                <h2 id="modal-tile-title" style="margin: 0; font-family: 'Outfit', sans-serif; font-size: 1.35rem; font-weight: 700; color: var(--text-primary);">Forensic Details</h2>
+                <span id="modal-close" style="font-size: 2rem; cursor: pointer; color: var(--text-secondary); line-height: 1; transition: color 0.2s;">&times;</span>
+            </div>
+            <div class="modal-body" style="padding: 1.5rem; overflow-y: auto; flex: 1;">
+                <div id="modal-injected-content"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification for click-to-copy -->
+    <div class="toast-copied" id="toast-copied">
+        <span class="toast-message">Copied to clipboard</span>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>Forensic Document Shield Built By <strong>Dhanush Reddy S</strong></p>
+        <p>© Confidential internal deployment. OCR fraud detector.</p>
+    </footer>
+
+    <!-- Connect JS Scripts -->
+    <script src="app.js"></script>
+</body>
+
+</html>

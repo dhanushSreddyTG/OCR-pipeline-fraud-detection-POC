@@ -1,0 +1,27 @@
+# Node.js
+node_modules/
+npm-debug.log
+yarn-error.log
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+ENV/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Project specific
+batch_results/
+*.docx
+*.pdf
+# Keep specific template images if needed, but ignore uploaded temp files
+# !astroid_template.png
+
+# OS generated files
+.DS_Store
+Thumbs.db
